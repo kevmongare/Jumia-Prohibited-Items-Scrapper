@@ -1,0 +1,26 @@
+name: Jumia prohibited items check
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 03:30 UTC = 06:30 EAT, leaves buffer before 8:00 am
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: state.json
+          key: state-${{ github.run_id }}
+          restore-keys: state-
+      - run: python monitor.py
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          REPORT_TO: ${{ secrets.REPORT_TO }}
+      - uses: actions/upload-artifact@v4
+        with: { name: report, path: reports/ }
