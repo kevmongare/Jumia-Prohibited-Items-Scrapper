@@ -1,0 +1,6 @@
+state.json
+reports/
+__pycache__/
+*.pyc
+.env
+rules.xlsx
